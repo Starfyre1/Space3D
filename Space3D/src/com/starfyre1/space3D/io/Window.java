@@ -15,7 +15,7 @@ public class Window {
 	/*****************************************************************************
 	 * Member Variables
 	 ****************************************************************************/
-	private long window;
+	private long mWindow;
 
 	/*****************************************************************************
 	 * Constructors
@@ -29,7 +29,7 @@ public class Window {
 	 ****************************************************************************/
 	public void createWindow(int width, int height) {
 		if (!glfwInit()) {
-			throw new IllegalStateException("Failed to initialized GLFW!"); //$NON-NLS-1$
+			throw new IllegalStateException("Failed to initialize GLFW!"); //$NON-NLS-1$
 		}
 
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -38,40 +38,47 @@ public class Window {
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-		window = glfwCreateWindow(width, height, "My LWGFL Program", 0, 0); //$NON-NLS-1$
-		//		long window = glfwCreateWindow(640, 480, "My LWGFL Program", glfwGetPrimaryMonitor(), 0); // for full screen //$NON-NLS-1$
-		if (window == 0) {
+		mWindow = glfwCreateWindow(width, height, "My OpenGL Program", 0, 0); //$NON-NLS-1$
+		if (mWindow == 0) {
 			throw new IllegalStateException("Failed to create window!"); //$NON-NLS-1$
 		}
-
-		glfwMakeContextCurrent(window);
+		glfwMakeContextCurrent(mWindow);
 		GL.createCapabilities();
 
 		GLFWVidMode videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-		glfwSetWindowPos(window, (videoMode.width() - 640) / 2, (videoMode.height() - 480) / 2);
+		glfwSetWindowPos(mWindow, (videoMode.width() - width) / 2, (videoMode.height() - height) / 2);
 
-		glfwShowWindow(window);
+		glfwShowWindow(mWindow);
 	}
 
+	/**
+	 * Cleans up and destroys the window. Also de-initializes GLFW.
+	 */
 	public void free() {
-		glfwDestroyWindow(window);
+		glfwDestroyWindow(mWindow);
 
 		glfwTerminate();
-
 	}
 
+	/**
+	 * Polls all events of the window.
+	 *
+	 * @return True, if the window should close.
+	 */
 	public boolean update() {
 		glfwPollEvents();
 
-		if (glfwWindowShouldClose(window)) {
+		if (glfwWindowShouldClose(mWindow)) {
 			return true;
 		}
 		return false;
-
 	}
 
+	/**
+	 * Swaps the buffers to display an image.
+	 */
 	public void swapBuffers() {
-		glfwSwapBuffers(window);
+		glfwSwapBuffers(mWindow);
 	}
 	/*****************************************************************************
 	 * Setter's and Getter's

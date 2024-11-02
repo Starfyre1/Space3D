@@ -19,7 +19,15 @@ public class Shader {
 	/*****************************************************************************
 	 * Member Variables
 	 ****************************************************************************/
-	private int vertexShader, fragmentShader, program;
+	private int	mVertexShader;
+	private int	mFragmentShader;
+	private int	mProgram;
+
+	private int	mUniMatProjection;
+	private int	mUniMatTransformWorld;
+	private int	mUniMatTransformObject;
+
+	private int	mUniSampleTexture;
 
 	/*****************************************************************************
 	 * Constructors
@@ -33,56 +41,88 @@ public class Shader {
 	public boolean create(String shader) {
 		int success;
 
-		vertexShader = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(vertexShader, readSource(shader + ".vs")); //$NON-NLS-1$
-		glCompileShader(vertexShader);
+		mVertexShader = glCreateShader(GL_VERTEX_SHADER);
+		glShaderSource(mVertexShader, readSource(shader + ".vs")); //$NON-NLS-1$
+		glCompileShader(mVertexShader);
 
-		success = glGetShaderi(vertexShader, GL_COMPILE_STATUS);
+		success = glGetShaderi(mVertexShader, GL_COMPILE_STATUS);
 		if (success == GL_FALSE) {
-			System.err.println(glGetShaderInfoLog(vertexShader));
+			System.err.println("Vertex: \n" + glGetShaderInfoLog(mVertexShader)); //$NON-NLS-1$
 			return false;
 		}
 
-		fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(fragmentShader, readSource(shader + ".fs")); //$NON-NLS-1$
-		glCompileShader(fragmentShader);
+		mFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+		glShaderSource(mFragmentShader, readSource(shader + ".fs")); //$NON-NLS-1$
+		glCompileShader(mFragmentShader);
 
-		success = glGetShaderi(fragmentShader, GL_COMPILE_STATUS);
+		success = glGetShaderi(mFragmentShader, GL_COMPILE_STATUS);
 		if (success == GL_FALSE) {
-			System.err.println(glGetShaderInfoLog(fragmentShader));
+			System.err.println("Fragment: \n" + glGetShaderInfoLog(mFragmentShader)); //$NON-NLS-1$
 			return false;
 		}
 
-		program = glCreateProgram();
-		glAttachShader(program, vertexShader);
-		glAttachShader(program, fragmentShader);
+		mProgram = glCreateProgram();
+		glAttachShader(mProgram, mVertexShader);
+		glAttachShader(mProgram, mFragmentShader);
 
-		glLinkProgram(program);
-		success = glGetProgrami(program, GL_LINK_STATUS);
+		glLinkProgram(mProgram);
+		success = glGetProgrami(mProgram, GL_LINK_STATUS);
 		if (success == GL_FALSE) {
-			System.err.println(glGetProgramInfoLog(program));
+			System.err.println("Program Link: \n" + glGetProgramInfoLog(mProgram)); //$NON-NLS-1$
+			return false;
+		}
+		glValidateProgram(mProgram);
+		success = glGetProgrami(mProgram, GL_VALIDATE_STATUS);
+		if (success == GL_FALSE) {
+			System.err.println("Program Validate: \n" + glGetProgramInfoLog(mProgram)); //$NON-NLS-1$
 			return false;
 		}
 
-		glValidateProgram(program);
-		success = glGetProgrami(program, GL_VALIDATE_STATUS);
-		if (success == GL_FALSE) {
-			System.err.println(glGetProgramInfoLog(program));
-			return false;
-		}
+		mUniMatProjection = glGetUniformLocation(mProgram, "cameraProjection"); //$NON-NLS-1$
+		mUniMatTransformWorld = glGetUniformLocation(mProgram, "transformWorld"); //$NON-NLS-1$
+		mUniMatTransformObject = glGetUniformLocation(mProgram, "transformObject"); //$NON-NLS-1$
+		mUniSampleTexture = glGetUniformLocation(mProgram, "sampleTexture"); //$NON-NLS-1$
+
 		return true;
 	}
 
 	public void destroy() {
-		glDetachShader(program, vertexShader);
-		glDetachShader(program, fragmentShader);
-		glDeleteShader(vertexShader);
-		glDeleteShader(fragmentShader);
-		glDeleteProgram(program);
+		glDetachShader(mProgram, mVertexShader);
+		glDetachShader(mProgram, mFragmentShader);
+		glDeleteShader(mVertexShader);
+		glDeleteShader(mFragmentShader);
+		glDeleteProgram(mProgram);
 	}
 
 	public void useShader() {
-		glUseProgram(program);
+		glUseProgram(mProgram);
+	}
+
+	public void setSampleTexture(int sample) {
+		if (mUniSampleTexture != -1) {
+			glUniform1i(mUniSampleTexture, sample);
+		}
+	}
+
+	public void setCamera(Camera camera) {
+		if (mUniMatProjection != -1) {
+			float matrix[] = new float[16];
+			camera.getProjection().get(matrix);
+			glUniformMatrix4fv(mUniMatProjection, false, matrix);
+		}
+		if (mUniMatTransformWorld != -1) {
+			float matrix[] = new float[16];
+			camera.getTransformation().get(matrix);
+			glUniformMatrix4fv(mUniMatTransformWorld, false, matrix);
+		}
+	}
+
+	public void setTransform(Transform transform) {
+		if (mUniMatTransformObject != -1) {
+			float matrix[] = new float[16];
+			transform.getTransformation().get(matrix);
+			glUniformMatrix4fv(mUniMatTransformObject, false, matrix);
+		}
 	}
 
 	private String readSource(String file) {
@@ -101,7 +141,6 @@ public class Shader {
 
 		return builder.toString();
 	}
-
 	/*****************************************************************************
 	 * Setter's and Getter's
 	 ****************************************************************************/

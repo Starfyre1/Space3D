@@ -3,70 +3,75 @@
 package com.starfyre1.space3D.graphics;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.stb.STBImage.*;
 
-public class Mesh {
+import java.nio.ByteBuffer;
+
+public class Texture {
 	/*****************************************************************************
 	 * Constants
 	 ****************************************************************************/
-	public static final int	VERTEX_SIZE	= 5;
 
 	/*****************************************************************************
 	 * Member Variables
 	 ****************************************************************************/
-	private int				mVertexArrayObject;
-	private int				mVertexBufferObject;
+	private int	mTextureObject;
 
-	private int				mVertexCount;
+	private int	mWidth;
+	private int	mHeight;
 
 	/*****************************************************************************
 	 * Constructors
 	 ****************************************************************************/
-	public Mesh() {
-
+	public Texture() {
 	}
 
 	/*****************************************************************************
 	 * Methods
 	 ****************************************************************************/
-	public boolean create(float vertices[]) {
-		mVertexArrayObject = glGenVertexArrays();
-		glBindVertexArray(mVertexArrayObject);
+	public boolean create(String texture_file) {
+		int x[] = new int[1];
+		int y[] = new int[1];
+		int component[] = new int[1];
 
-		mVertexBufferObject = glGenBuffers();
-		glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
-		glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+		ByteBuffer pixels = stbi_load(texture_file, x, y, component, 4);
 
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(0, 3, GL_FLOAT, false, VERTEX_SIZE * 4, 0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, false, VERTEX_SIZE * 4, 12);
+		if (pixels == null) {
+			System.err.println("Failed to load texture: " + texture_file); //$NON-NLS-1$
+			return false;
+		}
 
-		glBindVertexArray(0);
+		mTextureObject = glGenTextures();
+		glBindTexture(GL_TEXTURE_2D, mTextureObject);
 
-		mVertexCount = vertices.length / VERTEX_SIZE;
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		mWidth = x[0];
+		mHeight = y[0];
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mWidth, mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
 		return true;
 	}
 
 	public void destroy() {
-		glDeleteBuffers(mVertexBufferObject);
-		glDeleteVertexArrays(mVertexArrayObject);
+		glDeleteTextures(mTextureObject);
 	}
 
-	public void draw() {
-		glBindVertexArray(mVertexArrayObject);
-
-		glDrawArrays(GL_TRIANGLES, 0, mVertexCount);
-
-		glBindVertexArray(0);
+	public void bind() {
+		glBindTexture(GL_TEXTURE_2D, mTextureObject);
 	}
 
 	/*****************************************************************************
 	 * Setter's and Getter's
 	 ****************************************************************************/
+	public int getWidth() {
+		return mWidth;
+	}
+
+	public int getHeight() {
+		return mHeight;
+	}
 
 	/*****************************************************************************
 	 * Serialization
