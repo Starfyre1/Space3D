@@ -196,7 +196,7 @@
 	<classpathentry kind="lib" path="E:/Programming/3D-Space/lwjgl-release-3.3.4-custom/lwjgl-vulkan.jar"/>
 	<classpathentry kind="lib" path="E:/Programming/3D-Space/lwjgl-release-3.3.4-custom/lwjgl-vulkan-natives-macos.jar"/>
 	<classpathentry kind="lib" path="E:/Programming/3D-Space/lwjgl-release-3.3.4-custom/lwjgl-vulkan-natives-macos-arm64.jar"/>
-	<classpathentry kind="lib" path="E:/Programming/3D-Space/lwjgl-release-3.3.4-custom/lwjglx-debug-1.0.0.jar"/>
+	<classpathentry kind="lib" path="E:/Programming/3D-Space/lwjgl-release-3.3.4-custom/lwjglx-debug-1.0.0.jar" sourcepath="E:/Programming/3D-Space/lwjgl-release-3.3.4-custom/Source/lwjgl-opengl-sources.jar"/>
 	<classpathentry kind="lib" path="E:/Programming/3D-Space/lwjgl-release-3.3.4-custom/lwjgl-xxhash.jar"/>
 	<classpathentry kind="lib" path="E:/Programming/3D-Space/lwjgl-release-3.3.4-custom/lwjgl-xxhash-natives-linux.jar"/>
 	<classpathentry kind="lib" path="E:/Programming/3D-Space/lwjgl-release-3.3.4-custom/lwjgl-xxhash-natives-macos.jar"/>
